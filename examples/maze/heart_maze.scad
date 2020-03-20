@@ -1,8 +1,9 @@
 use <line2d.scad>;
 use <hollow_out.scad>;
-use <square_maze.scad>;
 use <ellipse_extrude.scad>;
 use <arc.scad>;
+use <experimental/mz_blocks.scad>;
+use <experimental/mz_get.scad>;
 
 radius_of_heart = 12;
 height_of_heart = 25;
@@ -58,6 +59,15 @@ module heart_to_heart_wall(radius, length, angle, thickness) {
 }
 
 module heart_maze(maze, radius, cblocks, levels, thickness = 1) {    
+	function no_wall(block) = get_wall_type(block) == "NO_WALL";
+	function upper_wall(block) = get_wall_type(block) == "UPPER_WALL";
+	function right_wall(block) = get_wall_type(block) == "RIGHT_WALL";
+	function upper_right_wall(block) = get_wall_type(block) == "UPPER_RIGHT_WALL";
+
+	function get_x(block) = mz_get(block, "x"); 
+	function get_y(block) = mz_get(block, "y");
+	function get_wall_type(block) = mz_get(block, "w");
+	
     arc_angle = 360 / cblocks;
 	r = radius / (levels + 1);
 
@@ -96,8 +106,8 @@ module heart_maze(maze, radius, cblocks, levels, thickness = 1) {
 	}
 }
 
-maze = go_maze(1, 1, 
-	starting_maze(cblocks, levels),
+maze = mz_blocks(
+	[1, 1],  
 	cblocks, levels, y_circular = true
 );
 

@@ -29,13 +29,7 @@ module pyramid_with_stairs(base_width, stairs_width, rows) {
     }
 }
 
-module step_pyramid_maze(maze_rows, block_width, stairs_width) {
-    maze_blocks = go_maze(
-        1, 1,   // starting point
-        starting_maze(maze_rows, maze_rows),  
-        maze_rows, maze_rows
-    ); 
-    
+module step_pyramid_maze(maze_rows, block_width, stairs_width) {    
     intersection() {
         pyramid_with_stairs(
             maze_rows * block_width, stairs_width, maze_rows);
@@ -46,13 +40,7 @@ module step_pyramid_maze(maze_rows, block_width, stairs_width) {
             
             translate([-(maze_rows * block_width) / 2, -(maze_rows * block_width) / 2, 0]) 
             difference() {
-                build_square_maze(
-                    maze_rows, 
-                    maze_rows, 
-                    maze_blocks, 
-                    block_width, 
-                    stairs_width
-                );
+                square_maze([1, 1], maze_rows, block_width, stairs_width);
 
                 // entry
                 translate([0, stairs_width]) 

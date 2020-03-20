@@ -162,16 +162,52 @@ module function_grapher(points, thickness, style = "FACES", slicing = "SLASH") {
         test_function_grapher_faces(pts, face_idxs);
     }
 
-    module tri_to_lines(tri1, tri2) {
-       polyline3d(concat(tri1, [tri1[0]]), thickness);
-       polyline3d(concat(tri2, [tri2[0]]), thickness);
+    module tri_to_slash_lines(tri1, tri2) {
+        polyline3d(concat(tri1, [tri1[0]]), thickness);
+        if(tri2[0][0] == points[0][0][0]) {
+            polyline3d([tri2[0], tri2[2]], thickness);
+        }
+
+        if(tri2[1][1] == points[rows - 1][0][1]) {
+            polyline3d([tri2[1], tri2[2]], thickness);
+        }
     }
 
-    module tri_to_hull_lines(tri1, tri2) {
-       hull_polyline3d(concat(tri1, [tri1[0]]), thickness);
-       hull_polyline3d(concat(tri2, [tri2[0]]), thickness);
-    }    
-    
+    module tri_to_backslash_lines(tri1, tri2) {
+        polyline3d(concat(tri1, [tri1[0]]), thickness);
+        if(tri2[1][0] == points[0][columns - 1][0]) {
+            polyline3d([tri2[1], tri2[2]], thickness);
+        }
+
+        if(tri2[2][1] == points[rows - 1][columns - 1][1]) {
+            polyline3d([tri2[0], tri2[2]], thickness);
+        }
+    }
+
+    module tri_to_slash_hull_lines(tri1, tri2) {
+        hull_polyline3d(concat(tri1, [tri1[0]]), thickness);
+
+        if(tri2[0][0] == points[0][0][0]) {
+            hull_polyline3d([tri2[0], tri2[2]], thickness);
+        }
+
+        if(tri2[1][1] == points[rows - 1][0][1]) {
+            hull_polyline3d([tri2[1], tri2[2]], thickness);
+        }
+    }  
+
+    module tri_to_backslash_hull_lines(tri1, tri2) {
+        hull_polyline3d(concat(tri1, [tri1[0]]), thickness);
+
+        if(tri2[1][0] == points[0][columns - 1][0]) {
+            hull_polyline3d([tri2[1], tri2[2]], thickness);
+        }
+
+        if(tri2[2][1] == points[rows - 1][columns - 1][1]) {
+            hull_polyline3d([tri2[0], tri2[2]], thickness);
+        }
+    }        
+
     module hull_pts(tri) {
        half_thickness = thickness / 2;
        hull() {
@@ -186,44 +222,76 @@ module function_grapher(points, thickness, style = "FACES", slicing = "SLASH") {
        hull_pts(tri2);
     }    
 
-    module tri_to_graph(tri1, tri2) {
+    module tri_to_graph(twintri_lt) {
         if(style == "LINES") {
-            tri_to_lines(tri1, tri2);
+            if(slicing == "SLASH") {
+                for(twintri = twintri_lt) {
+                    tri_to_slash_lines(twintri[0], twintri[1]);
+                }
+            }
+            else {
+                for(twintri = twintri_lt) {
+                    tri_to_backslash_lines(twintri[0], twintri[1]);
+                }                
+            }
         } else if(style == "HULL_FACES") {  // Warning: May be very slow!!
-            tri_to_hull_faces(tri1, tri2);
-        } else if(style == "HULL_LINES") {  // Warning: very very slow!!
-            tri_to_hull_lines(tri1, tri2);
+            for(twintri = twintri_lt) {
+                tri_to_hull_faces(twintri[0], twintri[1]);
+            }                  
+        } else if(style == "HULL_LINES") {  // Warning: May be very slow!!
+            if(slicing == "SLASH") {
+                for(twintri = twintri_lt) {
+                    tri_to_slash_hull_lines(twintri[0], twintri[1]);
+                }                  
+            }
+            else {
+                for(twintri = twintri_lt) {
+                    tri_to_backslash_hull_lines(twintri[0], twintri[1]);
+                }                    
+            }
         }
     }
+        
     
     if(style == "FACES") {
         faces();
     } else {
-        for(yi = yi_range) {
-            for(xi = xi_range) {
-                if(slicing == "SLASH") {
-                    tri_to_graph([
-                        points[yi][xi], 
-                        points[yi][xi + 1], 
-                        points[yi + 1][xi + 1]
-                    ], [
-                        points[yi][xi], 
-                        points[yi + 1][xi + 1], 
-                        points[yi + 1][xi]
-                    ]);
-                } else {                
-                    tri_to_graph([
-                        points[yi][xi], 
-                        points[yi][xi + 1], 
-                        points[yi + 1][xi]
-                    ], [
-                        points[yi + 1][xi], 
-                        points[yi][xi + 1], 
-                        points[yi + 1][xi + 1]
-                    ]);                    
-                }        
-            }
-        }
+        twintri_lt = slicing == "SLASH" ? 
+            [
+                for(yi = yi_range)
+                    for(xi = xi_range)
+                        [
+                            [
+                                points[yi][xi], 
+                                points[yi][xi + 1], 
+                                points[yi + 1][xi + 1]
+                            ],
+                            [
+                                points[yi][xi], 
+                                points[yi + 1][xi + 1], 
+                                points[yi + 1][xi]                            
+                            ]
+                        ]
+            ]
+            :
+            [
+                for(yi = yi_range)
+                    for(xi = xi_range)
+                        [
+                            [
+                                points[yi][xi], 
+                                points[yi][xi + 1], 
+                                points[yi + 1][xi]
+                            ],
+                            [
+                                points[yi + 1][xi], 
+                                points[yi][xi + 1], 
+                                points[yi + 1][xi + 1]                        
+                            ]
+                        ]
+            ];
+        
+        tri_to_graph(twintri_lt);
     }
 }
 

@@ -10,26 +10,15 @@ module pyramid_maze(maze_rows, block_width, wall_thickness) {
         linear_extrude(height, scale = 0) 
             square(leng, center = true);
     }
-
-    maze_blocks = go_maze(
-        1, 1,   // starting point
-        starting_maze(maze_rows, maze_rows),  
-        maze_rows, maze_rows
-    ); 
-   
+    
     leng = maze_rows * block_width ;
     half_leng = leng / 2;
     
     intersection() {
         linear_extrude(leng * 2) 
-        translate([-half_leng, -half_leng]) build_square_maze(
-            maze_rows, 
-            maze_rows, 
-            maze_blocks, 
-            block_width, 
-            wall_thickness
-        );
-        
+        translate([-half_leng, -half_leng]) 
+            square_maze([1, 1], maze_rows, block_width, wall_thickness);
+
         pyramid(leng + wall_thickness);
     }
 }

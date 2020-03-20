@@ -1,6 +1,7 @@
 use <hull_polyline3d.scad>;
-use <rotate_p.scad>;
-use <square_maze.scad>;
+use <experimental/mz_blocks.scad>;
+use <experimental/mz_walls.scad>;
+use <experimental/ptf_y_twist.scad>;
 
 rows = 16;
 columns = 8;
@@ -9,30 +10,15 @@ wall_thickness = 1;
 angle = 180;
 // $fn = 24;
 
-function y_twist(walls, angle, rows, columns, block_width) = 
-    let(
-        x_offset = columns * block_width / 2,
-        x_centered = [
-            for(wall_pts = walls) 
-                [for(pt = wall_pts) [pt[0], pt[1], 0] + [-x_offset, 0, 0]]
-        ],
-        a_step = angle / (rows * block_width)
-    )
-    [
-        for(wall_pts = x_centered)    
-           [
-               for(pt = wall_pts)
-                   rotate_p(pt, [0, pt[1] * a_step, 0]) + [x_offset, 0, 0]
-           ]
-    ];
-
-blocks = go_maze( 
-    1, 1,   // starting point
-    starting_maze(rows, columns),  
+blocks = mz_blocks(
+    [1, 1],  
     rows, columns
 );
-    
-walls = maze_walls(blocks, rows, columns, block_width);
-for(wall_pts = y_twist(walls, angle, rows, columns, block_width)) {   
-   hull_polyline3d(wall_pts, wall_thickness);
+
+walls = mz_walls(blocks, rows, columns, block_width);
+
+size = [columns * block_width, rows * block_width];
+for(wall_pts = walls) {  
+   transformed = [for(pt = wall_pts) ptf_y_twist(size, pt, angle)];
+   hull_polyline3d(transformed, wall_thickness);
 }

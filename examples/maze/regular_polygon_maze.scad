@@ -1,6 +1,7 @@
 use <line2d.scad>;
 use <hollow_out.scad>;
-use <square_maze.scad>;
+use <experimental/mz_blocks.scad>;
+use <experimental/mz_get.scad>;
 
 // only for creating a small maze
 
@@ -36,13 +37,22 @@ module regular_polygon_to_polygon_wall(radius, length, angle, thickness, sides) 
 }
 
 module regular_polygon_maze(radius, cblocks, levels, thickness = 1, sides) {    
+	function no_wall(block) = get_wall_type(block) == "NO_WALL";
+	function upper_wall(block) = get_wall_type(block) == "UPPER_WALL";
+	function right_wall(block) = get_wall_type(block) == "RIGHT_WALL";
+	function upper_right_wall(block) = get_wall_type(block) == "UPPER_RIGHT_WALL";
+
+	function get_x(block) = mz_get(block, "x"); 
+	function get_y(block) = mz_get(block, "y");
+	function get_wall_type(block) = mz_get(block, "w");
+
     arc_angle = 360 / cblocks;
 	r = radius / (levels + 1);
 	
-	maze = go_maze(1, 1, 
-        starting_maze(cblocks, levels),
-        cblocks, levels, y_circular = true
-    );
+	maze = mz_blocks(
+		[1, 1],  
+		cblocks, levels, y_circular = true
+	);
 
 	difference() {
 		render() union() {

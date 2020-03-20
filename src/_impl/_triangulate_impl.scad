@@ -19,9 +19,10 @@ function _triangulate_snipable(shape_pts, u, v, w, n, indices, epsilon = 0.0001)
         bx = b[0],
         by = b[1],
         cx = c[0],
-        cy = c[1]
+        cy = c[1],
+        determinant = cross([bx - ax, by - ay],  [cx - ax, cy - ay])
     )
-    epsilon > (((bx - ax) * (cy - ay)) - ((by - ay) * (cx - ax))) ? 
+    epsilon > determinant ? 
         false : _triangulate_snipable_sub(shape_pts, n, u, v, w, a, b, c, indices);
     
 function _triangulate_snipable_sub(shape_pts, n, u, v, w, a, b, c, indices, p = 0) = 

@@ -11,7 +11,7 @@
 use <__comm__/__frags.scad>;
 use <helix.scad>;
 use <cross_sections.scad>;
-use <polysections.scad>;
+use <sweep.scad>;
 
 module helix_extrude(shape_pts, radius, levels, level_dist, 
                      vt_dir = "SPI_DOWN", rt_dir = "CT_CLK", 
@@ -28,7 +28,8 @@ module helix_extrude(shape_pts, radius, levels, level_dist,
     r_dir = rt_dir == "CT_CLK" ? 1 : -1;
             
     angle_step = 360 / frags * r_dir;
-    initial_angle = atan2(level_dist / frags, PI * 2 * init_r / frags) * v_dir * r_dir;
+    initial_angle = atan2(level_dist / frags, PI * 2 * init_r / frags) * v_dir * r_dir + 
+                    v_dir == "SPI_DOWN" && r_dir == "CLK" ? 45 : 0;
 
     path_points = helix(
         radius = radius, 
@@ -47,7 +48,7 @@ module helix_extrude(shape_pts, radius, levels, level_dist,
     
     sections = cross_sections(shape_pts, path_points, angles, twist, scale);
 
-    polysections(
+    sweep(
         sections,
         triangles = triangles
     );

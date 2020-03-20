@@ -1,7 +1,7 @@
 use <hull_polyline3d.scad>;
-use <rotate_p.scad>;
-use <square_maze.scad>;
-use <twisted_maze.scad>;
+use <experimental/mz_blocks.scad>;
+use <experimental/mz_walls.scad>;
+use <experimental/ptf_ring.scad>;
 
 rows = 48;
 columns = 8;
@@ -14,14 +14,16 @@ leng = rows * block_width;
 radius = 0.5 * leng / PI;
 a_step = 360 / leng;
 
-blocks = go_maze( 
-    1, 1,   // starting point
-    starting_maze(rows, columns),  
-    rows, columns, y_circular = true
+blocks = mz_blocks(
+    [1, 1],  
+    rows, columns, 
+    y_circular = true
 );
-walls = maze_walls(blocks, rows, columns, block_width, bottom_border = false);
 
-for(wall_pts = y_twist(walls, angle, rows, columns, block_width)) {  
-   z_rotated = [for(pt = wall_pts) rotate_p([radius + pt[0], 0, pt[2]], a_step * pt[1])];
-   hull_polyline3d(z_rotated, wall_thickness);
+walls = mz_walls(blocks, rows, columns, block_width, bottom_border = false);
+
+size = [columns * block_width, rows * block_width];
+for(wall_pts = walls) {  
+   transformed = [for(pt = wall_pts) ptf_ring(size, pt, radius, 360, angle)];
+   hull_polyline3d(transformed, wall_thickness);
 }

@@ -3,7 +3,7 @@ use <square_maze.scad>;
 maze_rows = 8;
 block_width = 2;
 wall_thickness = 1;
-inner_cube = false;
+inner_cube = true;
 travel_all = true;
 
 module cube_maze(maze_rows, block_width, wall_thickness, inner_cube, travel_all) {
@@ -20,17 +20,8 @@ module cube_maze(maze_rows, block_width, wall_thickness, inner_cube, travel_all)
     module two_mazes() {
         module one_maze() {
             translate([origin, origin, half_cube_size]) 
-                linear_extrude(wall_thickness) build_square_maze(
-                    maze_rows, 
-                    maze_rows, 
-                    go_maze(
-                        1, 1,   // starting point
-                        starting_maze(maze_rows, maze_rows),  
-                        maze_rows, maze_rows
-                    ), 
-                    block_width, 
-                    wall_thickness
-                );
+            linear_extrude(wall_thickness) 
+                square_maze([1, 1], maze_rows, block_width, wall_thickness);
         }
 
         one_maze();  
